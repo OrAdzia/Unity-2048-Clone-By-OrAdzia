@@ -5,8 +5,15 @@ using UnityEngine;
 
 public class Tile : MonoBehaviour
 {
-    private int numValue = 2;
     [SerializeField] private TMP_Text text;
+
+    private int numValue = 2;
+    private Vector3 startPos;
+    private Vector3 endPos;
+    private bool isAnimating;
+    private float count;
+    private float animationTime = 0.3f;
+
 
     public void SetValue(int value)
     {
