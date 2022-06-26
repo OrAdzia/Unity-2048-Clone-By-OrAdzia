@@ -1,14 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Tile : MonoBehaviour
 {
     [SerializeField] private TMP_Text text;
     [SerializeField] private TileSettings tileSettings;
 
-    private int numValue = 2;
+    private int _value = 2;
     private float count;
     private Vector3 startPos;
     private Vector3 endPos;
@@ -16,11 +18,13 @@ public class Tile : MonoBehaviour
     private Tile mergeTile;
     private Animator animator;
     private TileManager tileManager;
+    private Image tileImage;
 
-    private void Start()
+    private void Awake()
     {
         animator = GetComponent<Animator>();
         tileManager = FindObjectOfType<TileManager>();
+        tileImage = GetComponent<Image>();
     }
 
     private void Update()
@@ -45,7 +49,7 @@ public class Tile : MonoBehaviour
             
             if (mergeTile != null)
             {
-                int newValue = numValue + mergeTile.numValue;
+                int newValue = _value + mergeTile._value;
                 tileManager.AddScore(newValue);
                 SetValue(newValue);
                 Destroy(mergeTile.gameObject);
@@ -57,8 +61,11 @@ public class Tile : MonoBehaviour
 
     public void SetValue(int value)
     {
-        numValue = value;
+        _value = value;
         text.text = value.ToString();
+        TileColor newColor = tileSettings.TileColors.FirstOrDefault(color => color.value == _value) ?? new TileColor();
+        text.color = newColor.fgColor;
+        tileImage.color = newColor.bgColor;
     }
 
     public void SetPosition(Vector3 newPos, bool instant)
@@ -82,7 +89,7 @@ public class Tile : MonoBehaviour
 
     public bool Merge(Tile otherTile)
     {
-        if (this.numValue != otherTile.numValue)
+        if (this._value != otherTile._value)
         {
             return false;
         }
@@ -98,6 +105,6 @@ public class Tile : MonoBehaviour
 
     public int GetValue()
     {
-        return numValue;
+        return _value;
     }
 }
