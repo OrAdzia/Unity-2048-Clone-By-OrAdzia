@@ -39,7 +39,7 @@ public class TileManager : MonoBehaviour
     {
         var xInput = Mathf.RoundToInt(Input.GetAxisRaw("Horizontal"));
         var yInput = Mathf.RoundToInt(Input.GetAxisRaw("Vertical"));
-
+        
         if (lastXInput == 0 && lastYInput == 0)
         {
             if (!isAnimating)
