@@ -16,6 +16,7 @@ public class TileManager : MonoBehaviour
     private bool isAnimating;
     private bool tilesUpdated;
     private int lastXInput, lastYInput;
+    private Stack<GameState> gameStates = new Stack<GameState>();
 
     // Start is called before the first frame update
     private void Start()
@@ -48,6 +49,47 @@ public class TileManager : MonoBehaviour
     {
         var activeScene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(activeScene.name);
+    }
+
+    public void LoadLastTileValues()
+    {
+        if (isAnimating)
+        {
+            return;
+        }
+
+        if (!gameStates.Any())
+        {
+            return;
+        }
+
+        GameState previousGameState = gameStates.Pop();
+
+        foreach (Tile t in tiles)
+        {
+            if (t != null)
+            {
+                Destroy(t.gameObject);
+            }
+        }
+
+        for (int x = 0; x < GridSize; x++)
+        {
+            for (int y = 0; y < GridSize; y++)
+            {
+                tiles[x, y] = null;
+                if (previousGameState.tileValues[x, y] == 0)
+                {
+                    continue;
+                }
+
+                Tile tile = Instantiate(tilePrefab, transform.parent);
+                tile.SetValue(previousGameState.tileValues[x, y]);
+                tiles[x, y] = tile;
+            }
+        }
+
+        UpdateTilePosition(true);
     }
 
     private void GetTilePositions()
@@ -159,6 +201,7 @@ public class TileManager : MonoBehaviour
         }
 
         tilesUpdated = false;
+        int[,] preMoveTileValues = GetCurrentTileValues();
 
         if (x == 0)
         {
@@ -185,8 +228,27 @@ public class TileManager : MonoBehaviour
 
         if (tilesUpdated)
         {
+            gameStates.Push(new GameState() { tileValues = preMoveTileValues });
             UpdateTilePosition(false);
         }
+    }
+
+    private int[,] GetCurrentTileValues()
+    {
+        int[,] result = new int[GridSize, GridSize];
+
+        for (int x = 0; x < GridSize; x++)
+        {
+            for (int y = 0; y < GridSize; y++)
+            {
+                if (tiles[x, y] != null)
+                {
+                    result[x, y] = tiles[x, y].GetValue();
+                }
+            }
+        }
+
+        return result;
     }
 
     private bool TileExistsBetween(int x, int y, int x2, int y2)

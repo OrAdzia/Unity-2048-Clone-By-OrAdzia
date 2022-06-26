@@ -91,4 +91,9 @@ public class Tile : MonoBehaviour
 
         return true;
     }
+
+    public int GetValue()
+    {
+        return numValue;
+    }
 }
