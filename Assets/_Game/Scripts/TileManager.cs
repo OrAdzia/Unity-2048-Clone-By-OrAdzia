@@ -14,6 +14,7 @@ public class TileManager : MonoBehaviour
     [SerializeField] private TileSettings tileSettings;
     [SerializeField] private UnityEvent<int> scoreUpdated;
     [SerializeField] private UnityEvent<int> bestScoreUpdated;
+    [SerializeField] private UnityEvent<int> moveCountUpdated;
 
     private readonly Transform[,] tilePositions = new Transform[GridSize, GridSize];
     private readonly Tile[,] tiles = new Tile[GridSize, GridSize];
@@ -22,6 +23,7 @@ public class TileManager : MonoBehaviour
     private int lastXInput, lastYInput;
     private int score;
     private int bestScore;
+    private int moveCount;
     private Stack<GameState> gameStates = new Stack<GameState>();
 
     private void Start()
@@ -39,7 +41,7 @@ public class TileManager : MonoBehaviour
     {
         var xInput = Mathf.RoundToInt(Input.GetAxisRaw("Horizontal"));
         var yInput = Mathf.RoundToInt(Input.GetAxisRaw("Vertical"));
-        
+
         if (lastXInput == 0 && lastYInput == 0)
         {
             if (!isAnimating)
@@ -87,6 +89,9 @@ public class TileManager : MonoBehaviour
 
         score = previousGameState.score;
         scoreUpdated.Invoke(score);
+
+        moveCount = previousGameState.moveCount;
+        moveCountUpdated.Invoke(moveCount);
 
         foreach (Tile t in tiles)
         {
@@ -251,7 +256,9 @@ public class TileManager : MonoBehaviour
 
         if (tilesUpdated)
         {
-            gameStates.Push(new GameState() { tileValues = preMoveTileValues, score = score });
+            gameStates.Push(new GameState() { tileValues = preMoveTileValues, score = score, moveCount = moveCount });
+            moveCount++;
+            moveCountUpdated.Invoke(moveCount);
             UpdateTilePosition(false);
         }
     }
