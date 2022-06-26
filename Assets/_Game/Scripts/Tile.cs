@@ -13,6 +13,13 @@ public class Tile : MonoBehaviour
     private Vector3 startPos;
     private Vector3 endPos;
     private bool isAnimating;
+    private Tile mergeTile;
+    private Animator animator;
+
+    private void Start()
+    {
+        animator = GetComponent<Animator>();
+    }
 
     private void Update()
     {
@@ -33,6 +40,14 @@ public class Tile : MonoBehaviour
         if (count >= tileSettings.animationTime)
         {
             isAnimating = false;
+            
+            if (mergeTile != null)
+            {
+                animator.SetTrigger("Merge");
+                SetValue(numValue + mergeTile.numValue);
+                Destroy(mergeTile.gameObject);
+                mergeTile = null;
+            }
         }
     }
 
@@ -54,5 +69,26 @@ public class Tile : MonoBehaviour
         endPos = newPos;
         count = 0;
         isAnimating = true;
+
+        if (mergeTile != null)
+        {
+            mergeTile.SetPosition(newPos, false);
+        }
+    }
+
+    public bool Merge(Tile otherTile)
+    {
+        if (this.numValue != otherTile.numValue)
+        {
+            return false;
+        }
+        if (mergeTile != null || otherTile.mergeTile != null)
+        {
+            return false;
+        }
+
+        mergeTile = otherTile;
+
+        return true;
     }
 }

@@ -182,6 +182,54 @@ public class TileManager : MonoBehaviour
         }
     }
 
+    private bool TileExistsBetween(int x, int y, int x2, int y2)
+    {
+        if (x == x2)
+        {
+            return TileExistsBetweenVertical(x, y, y2);
+        }
+        else if (y == y2)
+        {
+            return TileExistsBetweenHorizontal(x, x2, y);
+        }
+
+        Debug.LogError($"BETWEEN CHECK - INVALID PARAMETERS ({x}, {y}) ({x2}, {y2})");
+
+        return true;
+    }
+
+    private bool TileExistsBetweenHorizontal(int x, int x2, int y)
+    {
+        int minX = Mathf.Min(x, x2);
+        int maxX = Mathf.Max(x, x2);
+
+        for (int xIndex = minX + 1; xIndex < maxX; xIndex++)
+        {
+            if (tiles[xIndex, y] != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool TileExistsBetweenVertical(int x, int y, int y2)
+    {
+        int minY = Mathf.Min(y, y2);
+        int maxY = Mathf.Max(y, y2);
+
+        for (int yIndex = minY + 1; yIndex < maxY; yIndex++)
+        {
+            if (tiles[x, yIndex] != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void TryMoveRight()
     {
         for (int y = 0; y < GridSize; y++)
@@ -192,7 +240,21 @@ public class TileManager : MonoBehaviour
 
                 for (int x2 = GridSize - 1; x2 > x; x2--)
                 {
-                    if (tiles[x2, y] != null) continue;
+                    if (tiles[x2, y] != null) 
+                    { 
+                        if (TileExistsBetween(x, y, x2, y))
+                        {
+                            continue;
+                        }
+
+                        if (tiles[x2, y].Merge(tiles[x, y]))
+                        {
+                            tiles[x, y] = null;
+                            tilesUpdated = true;
+                            break;
+                        }
+                        continue;
+                    }
 
                     tilesUpdated = true;
                     tiles[x2, y] = tiles[x, y];
@@ -213,7 +275,21 @@ public class TileManager : MonoBehaviour
 
                 for (int x2 = 0; x2 < x; x2++)
                 {
-                    if (tiles[x2, y] != null) continue;
+                    if (tiles[x2, y] != null) 
+                    {
+                        if (TileExistsBetween(x, y, x2, y))
+                        {
+                            continue;
+                        }
+
+                        if (tiles[x2, y].Merge(tiles[x, y]))
+                        {
+                            tiles[x, y] = null;
+                            tilesUpdated = true;
+                            break;
+                        }
+                        continue;
+                    }
 
                     tilesUpdated = true;
                     tiles[x2, y] = tiles[x, y];
@@ -234,7 +310,21 @@ public class TileManager : MonoBehaviour
 
                 for (int y2 = GridSize - 1; y2 > y; y2--)
                 {
-                    if (tiles[x, y2] != null) continue;
+                    if (tiles[x, y2] != null) 
+                    {
+                        if (TileExistsBetween(x, y, x, y2))
+                        {
+                            continue;
+                        }
+
+                        if (tiles[x, y2].Merge(tiles[x, y]))
+                        {
+                            tiles[x, y] = null;
+                            tilesUpdated = true;
+                            break;
+                        }
+                        continue;
+                    }
 
                     tilesUpdated = true;
                     tiles[x, y2] = tiles[x, y];
@@ -255,7 +345,21 @@ public class TileManager : MonoBehaviour
 
                 for (int y2 = 0; y2 < y; y2++)
                 {
-                    if (tiles[x, y2] != null) continue;
+                    if (tiles[x, y2] != null) 
+                    {
+                        if (TileExistsBetween(x, y, x, y2))
+                        {
+                            continue;
+                        }
+                        
+                        if (tiles[x, y2].Merge(tiles[x, y]))
+                        {
+                            tiles[x, y] = null;
+                            tilesUpdated = true;
+                            break;
+                        }
+                        continue;
+                    }
 
                     tilesUpdated = true;
                     tiles[x, y2] = tiles[x, y];
