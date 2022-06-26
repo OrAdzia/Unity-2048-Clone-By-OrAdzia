@@ -7,10 +7,13 @@ using UnityEngine.UI;
 public class TileManager : MonoBehaviour
 {
     public static int GridSize = 4;
-    
+    [SerializeField] private Tile tilePrefab;
+    [SerializeField] private TileSettings tileSettings;
+
     private readonly Transform[,] tilePositions = new Transform[GridSize, GridSize];
     private readonly Tile[,] tiles = new Tile[GridSize, GridSize];
-    [SerializeField] private Tile tilePrefab;
+    private bool isAnimating;
+    private bool tilesUpdated;
 
     // Start is called before the first frame update
     private void Start()
@@ -18,7 +21,7 @@ public class TileManager : MonoBehaviour
         GetTilePositions();
         TrySpawnTile();
         TrySpawnTile();
-        UpdateTilePosition();
+        UpdateTilePosition(true);
     }
 
     // Update is called once per frame
@@ -27,7 +30,10 @@ public class TileManager : MonoBehaviour
         float xInput = Input.GetAxisRaw("Horizontal");
         float yInput = Input.GetAxisRaw("Vertical");
 
-        TryMove(Mathf.RoundToInt(xInput), Mathf.RoundToInt(yInput));
+        if (!isAnimating)
+        {
+            TryMove(Mathf.RoundToInt(xInput), Mathf.RoundToInt(yInput));
+        }
     }
 
     private void GetTilePositions()
@@ -92,19 +98,33 @@ public class TileManager : MonoBehaviour
         }
     }
 
-    private void UpdateTilePosition()
+    private void UpdateTilePosition(bool instant)
     {
+        if (!instant)
+        {
+            isAnimating = true;
+            StartCoroutine(WaitForTileAnimation());
+        }
+
         for (int x = 0; x < GridSize; x++)
         {
             for (int y = 0; y < GridSize; y++)
             {
                 if (tiles[x, y] != null)
                 {
-                    tiles[x, y].transform.position = tilePositions[x, y].position;
+                    tiles[x, y].SetPosition(tilePositions[x, y].position, instant);
                 }
             }
         }
     }
+
+    private IEnumerator WaitForTileAnimation()
+    {
+        yield return new WaitForSeconds(tileSettings.animationTime);
+        isAnimating = false;
+    }
+
+
 
     private void TryMove(int x, int y)
     {
@@ -118,6 +138,8 @@ public class TileManager : MonoBehaviour
             Debug.Log($"Invalid Move {x}, {y}");
             return;
         }
+
+        tilesUpdated = false;
 
         if (x == 0)
         {
@@ -142,7 +164,10 @@ public class TileManager : MonoBehaviour
             }
         }
 
-        UpdateTilePosition();
+        if (tilesUpdated)
+        {
+            UpdateTilePosition(false);
+        }
     }
 
     private void TryMoveRight()
@@ -157,6 +182,7 @@ public class TileManager : MonoBehaviour
                 {
                     if (tiles[x2, y] != null) continue;
 
+                    tilesUpdated = true;
                     tiles[x2, y] = tiles[x, y];
                     tiles[x, y] = null;
                     break;
@@ -177,6 +203,7 @@ public class TileManager : MonoBehaviour
                 {
                     if (tiles[x2, y] != null) continue;
 
+                    tilesUpdated = true;
                     tiles[x2, y] = tiles[x, y];
                     tiles[x, y] = null;
                     break;
@@ -197,6 +224,7 @@ public class TileManager : MonoBehaviour
                 {
                     if (tiles[x, y2] != null) continue;
 
+                    tilesUpdated = true;
                     tiles[x, y2] = tiles[x, y];
                     tiles[x, y] = null;
                     break;
@@ -217,6 +245,7 @@ public class TileManager : MonoBehaviour
                 {
                     if (tiles[x, y2] != null) continue;
 
+                    tilesUpdated = true;
                     tiles[x, y2] = tiles[x, y];
                     tiles[x, y] = null;
                     break;

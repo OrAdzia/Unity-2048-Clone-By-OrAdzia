@@ -226,3 +226,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 3485627895865422906}
+  tileSettings: {fileID: 11400000, guid: cd439d556b0882041912d2db43cdb763, type: 2}
