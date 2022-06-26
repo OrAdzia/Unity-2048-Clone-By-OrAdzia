@@ -9,9 +9,11 @@ using UnityEngine.UI;
 public class TileManager : MonoBehaviour
 {
     public static int GridSize = 4;
+
     [SerializeField] private Tile tilePrefab;
     [SerializeField] private TileSettings tileSettings;
     [SerializeField] private UnityEvent<int> scoreUpdated;
+    [SerializeField] private UnityEvent<int> bestScoreUpdated;
 
     private readonly Transform[,] tilePositions = new Transform[GridSize, GridSize];
     private readonly Tile[,] tiles = new Tile[GridSize, GridSize];
@@ -19,18 +21,20 @@ public class TileManager : MonoBehaviour
     private bool tilesUpdated;
     private int lastXInput, lastYInput;
     private int score;
+    private int bestScore;
     private Stack<GameState> gameStates = new Stack<GameState>();
 
-    // Start is called before the first frame update
     private void Start()
     {
         GetTilePositions();
         TrySpawnTile();
         TrySpawnTile();
         UpdateTilePosition(true);
+
+        bestScore = PlayerPrefs.GetInt("BestScore", 0);
+        bestScoreUpdated.Invoke(bestScore);
     }
 
-    // Update is called once per frame
     private void Update()
     {
         var xInput = Mathf.RoundToInt(Input.GetAxisRaw("Horizontal"));
@@ -52,6 +56,13 @@ public class TileManager : MonoBehaviour
     {
         score += value;
         scoreUpdated.Invoke(score);
+
+        if (score > bestScore)
+        {
+            bestScore = score;
+            bestScoreUpdated.Invoke(bestScore);
+            PlayerPrefs.SetInt("BestScore", bestScore);
+        }
     }
 
     public void RestartGame()
